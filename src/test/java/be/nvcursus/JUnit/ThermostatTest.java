@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@DisplayName("Thermostat should")
 class ThermostatTest {
-	private final static int INTERVAL = 10;
+	private final static int INTERVAL = 100; //course says 10, but should be 100 because default interval in Thermostat is 100 and we want to wait longer than 1 thread cycle
 	private Thermostat thermostat;
 	private HeatingStub heatingStub;
 	private SensorStub sensorStub;
@@ -50,6 +52,7 @@ class ThermostatTest {
 	}
 	
 	@Test
+	@DisplayName("be heating when the sensor temperature is lower than target temperature")
 	public void testThermostat() throws InterruptedException, InvalidTemperatureException {
 		thermostat.setTargetTemperature(new Temperature(20));
 		sensorStub.setTemp(15);
@@ -57,4 +60,30 @@ class ThermostatTest {
 		assertTrue(thermostat.isHeating());
 	}
 
+	@Test
+	@DisplayName("stop heating when temperature hits target and start heating when temperature goes below target")
+	public void testChangeCurrent() throws InterruptedException, InvalidTemperatureException {
+		thermostat.setTargetTemperature(new Temperature(20));
+		sensorStub.setTemp(20);
+		Thread.sleep(INTERVAL*3);
+		assertFalse(thermostat.isHeating());
+		sensorStub.setTemp(19.0F);
+		Thread.sleep(INTERVAL*3);
+		assertTrue(thermostat.isHeating());
+	}
+	
+	@Test
+	@DisplayName("stop heating when target temperature is lowered to current temperature or lower and start heating when target is raised")
+	public void testChangeTarget() throws InterruptedException, InvalidTemperatureException {
+		thermostat.setTargetTemperature(new Temperature(25));
+		sensorStub.setTemp(20.7F);
+		Thread.sleep(INTERVAL*3);
+		assertTrue(thermostat.isHeating());
+		thermostat.setTargetTemperature(new Temperature(20.7F));
+		Thread.sleep(INTERVAL*3);
+		assertFalse(thermostat.isHeating());
+		thermostat.setTargetTemperature(new Temperature(20.8F));
+		Thread.sleep(INTERVAL*3);
+		assertTrue(thermostat.isHeating());
+	}
 }
