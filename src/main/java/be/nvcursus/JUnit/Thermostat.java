@@ -1,9 +1,11 @@
 package be.nvcursus.JUnit;
 
 public class Thermostat {
-	private final static int DEFAULT_INTERVAL = 100;
-	private Heating heating; //ter info: Heating is een interface
-	private Sensor sensor; //ter info: Sensor is een interface
+	//10 is the correct value, not 100, because testclasses use 10 as INTERVAL*3 
+	//for Thread.sleep to be sure the thermostat has executed the evaluate method
+	private final static int DEFAULT_INTERVAL = 10;
+	private Heating heating;
+	private Sensor sensor;
 	private Thread thread;
 	private Temperature targetTemperature;
 	private int interval = DEFAULT_INTERVAL;

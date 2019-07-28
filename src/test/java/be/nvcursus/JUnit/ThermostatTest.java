@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("Thermostat should")
 class ThermostatTest {
-	private final static int INTERVAL = 100; //course says 10, but should be 100 because default interval in Thermostat is 100 and we want to wait longer than 1 thread cycle
+	private final static int INTERVAL = 10;
 	private Thermostat thermostat;
 	private HeatingStub heatingStub;
 	private SensorStub sensorStub;

@@ -2,10 +2,14 @@ package be.nvcursus.JUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 /**
  * ThermostatTestWithMocks
  * Here, the class is tested using Mocks
@@ -17,7 +21,7 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("Thermostat should")
 class ThermostatTestWithMocks {
-	private final static int INTERVAL = 100; //course says 10, but should be 100 because default interval in Thermostat is 100 and we want to wait longer than 1 thread cycle
+	private final static int INTERVAL = 10;
 	private Thermostat thermostat;
 	private HeatingMock heatingMock;
 	private SensorMock sensorMock;
@@ -133,5 +137,21 @@ class ThermostatTestWithMocks {
 		assertTrue(thermostat.isHeating());
 		assertTrue(sensorMock.isCalled());
 		assertTrue(heatingMock.isHeating());
+	}
+	
+	@RepeatedTest(value=10)
+	public void testThermostatInterval() throws InterruptedException, InvalidTemperatureException {
+		thermostat.setTargetTemperature(new Temperature(20));
+		thermostat.setInterval(10);
+		heatingMock.setHeating(false);
+		sensorMock.setTemp(15);
+		sensorMock.setCalled(false);
+		assertTimeoutPreemptively(Duration.ofMillis(20), new Executable() {
+			public void execute() throws InterruptedException {
+				while (!heatingMock.isHeating()) {
+					Thread.sleep(1);
+				}
+			}
+		});
 	}
 }
