@@ -5,7 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -107,5 +109,64 @@ public class GreetingServiceTest2 {
 		
 		//execute test
 		Assertions.assertThrows(NullPointerException.class, () -> greeting.greet(null));
+	}
+	
+	@Test
+	public void testGreetVerify() {
+		//prepare mock
+		Mockito.when(helloMock.sayHello("World"))
+		.thenReturn("Hello World");
+		
+		//execute test
+		greeting.greet("World");
+		greeting.greet("World");
+		Mockito.verify(helloMock, Mockito.times(2)).sayHello("World");
+		//interessant: naast Mockito.times(aantal) heb je ook never(), atLeastOnce(), atLeast(aantal), atMost(aantal), only()
+		//met only() verifieer je of dit de enige methode was die werd aangeropen
+		
+		//met verifyZeroInteractions() verifieer je dat er niks meer gebeurd is met een mock
+	}
+	
+	@Test
+	public void testGreetVerifyOrder() {
+		//prepare mock
+		Mockito.when(helloMock.sayHello("World"))
+		.thenReturn("Hello World");
+		
+		//execute test
+		greeting.greet("World");
+		greeting.greet("Mars");
+		
+		//verify mock
+		InOrder inOrder = Mockito.inOrder(helloMock);
+		inOrder.verify(helloMock).sayHello("World");
+		inOrder.verify(helloMock).sayHello("Mars");
+	}
+	
+	@Test
+	public void testGreetVerifyArguments() {
+		//prepare mock
+		Mockito.when(helloMock.sayHello(ArgumentMatchers.anyString()))
+		.then(invocation -> "Hello " + invocation.getArgument(0));
+		
+		//execute test
+		greeting.greet("Moon");
+		
+		//verify mock
+		Mockito.verify(helloMock).sayHello(ArgumentMatchers.anyString());
+	}
+	
+	@Test
+	public void testGreetVerifyTime() {
+		//prepare mock
+		Mockito.when(helloMock.sayHello("World"))
+		.thenReturn("Hello World");
+		
+		//execute test
+		greeting.greet("World");
+		
+		//verify mock
+		Mockito.verify(helloMock, Mockito.timeout(10))
+		.sayHello("World");
 	}
 }
